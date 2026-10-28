@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bike Sharing Analysis Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans antialiased">
+
+    <header class="bg-gray-800 shadow-md border-b border-gray-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-emerald-400 flex items-center gap-2">
+                <span>🚴</span> Bike Sharing Dashboard
+            </h1>
+            <span class="text-sm text-gray-400 bg-gray-700 px-3 py-1 rounded-full">Data harian 2011–2012</span>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
+
+        <!-- SIDEBAR FILTER -->
+        <aside class="w-full md:w-64 bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 h-fit space-y-6 md:sticky md:top-24">
+            <h2 class="text-lg font-bold text-emerald-400 border-b border-gray-700 pb-2">Filter Data</h2>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-300 mb-2">Tahun</label>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                        <input type="checkbox" value="2011" class="filter-year accent-emerald-500" checked> 2011
+                    </label>
+                    <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                        <input type="checkbox" value="2012" class="filter-year accent-emerald-500" checked> 2012
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-300 mb-2">Musim</label>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                        <input type="checkbox" value="1" class="filter-season accent-emerald-500" checked> 🌸 Spring
+                    </label>
+                    <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                        <input type="checkbox" value="2" class="filter-season accent-emerald-500" checked> ☀️ Summer
+                    </label>
+                    <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                        <input type="checkbox" value="3" class="filter-season accent-emerald-500" checked> 🍂 Fall
+                    </label>
+                    <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                        <input type="checkbox" value="4" class="filter-season accent-emerald-500" checked> ❄️ Winter
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-300 mb-2">Kategori Hari</label>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                        <input type="checkbox" value="1" class="filter-workingday accent-emerald-500" checked> Hari Kerja
+                    </label>
+                    <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                        <input type="checkbox" value="0" class="filter-workingday accent-emerald-500" checked> Akhir Pekan / Libur
+                    </label>
+                </div>
+            </div>
+
+            <button id="resetFilter" type="button"
+                class="w-full text-sm font-semibold bg-gray-700 hover:bg-gray-600 text-gray-200 py-2 rounded-lg transition">
+                ↺ Reset Filter
+            </button>
+        </aside>
+
+        <!-- KONTEN UTAMA -->
+        <main class="flex-1 space-y-8 min-w-0">
+
+            <section class="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
+                <h2 class="text-xl font-bold text-emerald-300 mb-2">Overview Penyewaan Sepeda</h2>
+                <p class="text-gray-300 text-sm leading-relaxed mb-6">
+                    Seluruh grafik, angka, dan insight di bawah dihitung langsung dari dataset
+                    dan ikut berubah mengikuti <strong>Filter Data</strong>.
+                </p>
+
+                <div id="emptyNotice" class="hidden mb-4 p-3 rounded-lg bg-amber-900/40 border border-amber-600 text-amber-200 text-sm">
+                    Tidak ada data yang cocok. Pilih minimal satu opsi pada setiap grup filter, atau klik <strong>Reset Filter</strong>.
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-gray-700/50 p-4 rounded-lg border border-gray-600">
+                        <p class="text-xs text-gray-400 uppercase tracking-wider">Jumlah Hari</p>
+                        <p id="stat-records" class="text-2xl font-bold text-emerald-400 mt-1">-</p>
+                    </div>
+                    <div class="bg-gray-700/50 p-4 rounded-lg border border-gray-600">
+                        <p class="text-xs text-gray-400 uppercase tracking-wider">Total Penyewaan</p>
+                        <p id="stat-total" class="text-2xl font-bold text-blue-400 mt-1">-</p>
+                    </div>
+                    <div class="bg-gray-700/50 p-4 rounded-lg border border-gray-600">
+                        <p class="text-xs text-gray-400 uppercase tracking-wider">Rata-rata Harian</p>
+                        <p id="stat-avg" class="text-2xl font-bold text-purple-400 mt-1">-</p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 md:col-span-2">
+                    <h3 class="text-lg font-semibold mb-4 text-emerald-300">1. Total Penyewaan per Bulan & Tahun</h3>
+                    <div class="relative h-80"><canvas id="monthlyChart"></canvas></div>
+                    <p id="ins-monthly" class="insight"></p>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
+                    <h3 class="text-lg font-semibold mb-4 text-emerald-300">2. Casual vs Registered</h3>
+                    <div class="relative h-72"><canvas id="casualRegChart"></canvas></div>
+                    <p id="ins-user" class="insight"></p>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
+                    <h3 class="text-lg font-semibold mb-4 text-emerald-300">3. Total Penyewaan per Musim</h3>
+                    <div class="relative h-72"><canvas id="seasonChart"></canvas></div>
+                    <p id="ins-season" class="insight"></p>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
+                    <h3 class="text-lg font-semibold mb-4 text-emerald-300">4. Penyewaan: Hari Kerja vs Libur</h3>
+                    <div class="relative h-72"><canvas id="workingDayChart"></canvas></div>
+                    <p id="ins-work" class="insight"></p>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
+                    <h3 class="text-lg font-semibold mb-4 text-emerald-300">5. Suhu Terasa (atemp) vs Penyewaan</h3>
+                    <div class="relative h-72"><canvas id="tempChart"></canvas></div>
+                    <p id="ins-temp" class="insight"></p>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 md:col-span-2">
+                    <h3 class="text-lg font-semibold mb-4 text-emerald-300">6. Kelembapan (hum) vs Penyewaan</h3>
+                    <div class="relative h-72"><canvas id="humChart"></canvas></div>
+                    <p id="ins-hum" class="insight"></p>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 md:col-span-2">
+                    <h3 class="text-lg font-semibold mb-4 text-emerald-300">7. Pola Penyewaan per Jam (Rata-rata)</h3>
+                    <div class="relative h-80"><canvas id="hourChart"></canvas></div>
+                    <p id="ins-hour" class="insight"></p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="bg-gray-800 text-center py-6 border-t border-gray-700 text-sm text-gray-400">
+        <p>Bike Sharing Analysis Dashboard</p>
+    </footer>
+
+    <!-- Tombol kembali ke atas -->
+    <button id="backToTop" type="button" aria-label="Kembali ke atas" title="Kembali ke atas">↑</button>
+
+    <script src="data.js"></script>
+    <script src="data_hour.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

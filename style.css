@@ -1,0 +1,48 @@
+html {
+    scroll-behavior: smooth;
+}
+
+/* Teks insight di bawah tiap grafik */
+.insight {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #d1d5db;
+    background: rgba(55, 65, 81, 0.5);
+    border-left: 3px solid #34d399;
+    border-radius: 0.5rem;
+}
+
+/* Tombol kembali ke atas */
+#backToTop {
+    position: fixed;
+    right: 3rem;
+    bottom: 3rem;
+    z-index: 60;
+    width: 3.75rem;
+    height: 3.75rem;
+    border: 1px solid #374151;
+    border-radius: 9999px;
+    background: #10b981;
+    color: #111827;
+    font-size: 1.875rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.25s, transform 0.25s, visibility 0.25s, background 0.2s;
+}
+
+#backToTop.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+#backToTop:hover {
+    background: #34d399;
+}
